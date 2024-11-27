@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import Spinner from "../components/Spinner";
 import Confetti from 'react-confetti';
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { loadPlayers, loadWinners, randomNumber } from "../utils";
 import SpinAudio from '../assets/spin.mp3';
 import { Winner } from "../types/types";
@@ -64,13 +64,9 @@ const defaultNames = [
 ];
 
 function Play() {
-  const [reloadPlayer, setReloadPlayer] = useState(0); 
   const [runConfetti, setRunConfetti] = useState(false);
   const [prize, setPrize] = useState('');
-  const players = useMemo(() => {
-    return loadPlayers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reloadPlayer]);
+  const [players, setPlayers] = useState(loadPlayers());
   const [winnerIndex, setWinnerIndex] = useState(randomNumber(Math.max(players.length, 1)));
   const [winners, setWinners] = useState<Winner[]>(loadWinners());
 
@@ -115,9 +111,9 @@ function Play() {
     if (players.length > 0) {
       if (confirm(`Are you sure you want to remove "${players[winnerIndex].name} / ${players[winnerIndex].department}"?`)) {
         const filteredPlayers = players.filter((p) => p.id !== players[winnerIndex].id);
+        setPlayers(filteredPlayers);
         localStorage.setItem('players', JSON.stringify(filteredPlayers));
-        setReloadPlayer(prev => prev + 1);
-        shuffle();
+        setWinnerIndex(randomNumber(players.length));
       }
     }
   }
@@ -138,7 +134,7 @@ function Play() {
         index = index % players.length;
       } else {
         if (players.length > 0) {
-          const newWinners = [...winners, { ...players[index], prize: prize ? prize : 'Secret' }];
+          const newWinners = [...winners, { ...players[index], id: crypto.randomUUID(), prize: prize ? prize : 'Secret' }];
           setWinners(newWinners);
           localStorage.setItem('winners', JSON.stringify(newWinners));
         }
@@ -152,7 +148,16 @@ function Play() {
   }
 
   const shuffle = () => {
-    setWinnerIndex(randomNumber(Math.max(players.length, 1)));
+    if (players.length > 0) {
+      for (let i = 0; i < players.length; i++) {
+        const swapPlayerIndex = randomNumber(players.length);
+        const tempPlayer = players[i];
+        players[i] = players[swapPlayerIndex];
+        players[swapPlayerIndex] = tempPlayer; 
+      }
+      setPlayers([...players]);
+      setWinnerIndex(randomNumber(players.length));
+    }
   }
 
   return <Container>
