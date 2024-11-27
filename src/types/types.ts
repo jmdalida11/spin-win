@@ -3,3 +3,7 @@ export interface Player {
   name: string;
   department: string;
 }
+
+export interface Winner extends Player {
+  prize: string;
+}

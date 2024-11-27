@@ -54,6 +54,12 @@ const Item = styled.div`
   padding-left: 10px;
   padding-right: 10px;
   font-weight: bold;
+  
+  & > span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-wrap: nowrap;
+  }
 
   & > button {
     cursor: pointer;

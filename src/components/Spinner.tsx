@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
-import { memo, useMemo, useState } from "react";
-import { Player } from "../types/types";
+import { memo } from "react";
 
 const SpinnerStyle = styled.div`
   width: 500px;
@@ -14,8 +13,9 @@ const Card = styled.div<{
   width?: string;
   main?: boolean;
   isTop?: boolean; 
-  isBottom?: boolean; 
+  isBottom?: boolean;
 }>`
+  position: relative;
   height: 50px;
   width: ${({ width }) => width ?? '100%'};
    box-shadow: 0 0 1rem rgba(0,0,0,.6);
@@ -40,6 +40,12 @@ const Card = styled.div<{
   justify-content: center;
   align-items: center;
   font-weight: bold;
+
+  & > span {
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 `;
 
 const CardContainer = styled.div`
@@ -47,43 +53,35 @@ const CardContainer = styled.div`
   justify-content: center;
 `;
 
-
 interface Props {
-  players: Player[];
+  names: string[];
 }
 
-const Spinner: React.FC<Props> = ({ players }) => {
-  // const [winnerIndex, setWinnerIndex] = useState<number>(randomNumber);
-  // const winner = useMemo(() => {
-  //   if (players.length) {
-  //     return 'Enter Player';
-  //   }
-  // }, [players]);
-
+const Spinner: React.FC<Props> = ({ names }) => {
   return <SpinnerStyle>
     <CardContainer>
       <Card width="60%" isTop>
-        <span>Enter Player</span>
+        <span>{names[4]}</span>
       </Card>
     </CardContainer>
     <CardContainer>
       <Card width="80%" isTop>
-      <span>Enter Player</span>
+      <span>{names[3]}</span>
       </Card>
     </CardContainer>
     <CardContainer>
       <Card main>
-      <span>Enter Player</span>
+      <span>{names[2]}</span>
       </Card>
     </CardContainer>
     <CardContainer>
       <Card width="80%" isBottom>
-      <span>Enter Player</span>
+      <span>{names[1]}</span>
       </Card>
     </CardContainer>
     <CardContainer>
       <Card width="60%" isBottom>
-      <span>Enter Player</span>
+      <span>{names[0]}</span>
       </Card>
     </CardContainer>
   </SpinnerStyle>
