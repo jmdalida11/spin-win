@@ -188,6 +188,7 @@ function Play() {
       </div>
     </Right>
     {runConfetti && <Confetti
+      numberOfPieces={500}
       recycle={false}
       width={window.innerWidth - (window.innerWidth * 0.05)}
       height={window.innerHeight - (window.innerHeight * 0.05)}
