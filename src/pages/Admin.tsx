@@ -121,25 +121,29 @@ const AdminPage = () => {
     if (!textFieldRef.current) {
       return;
     }
-    const value = (textFieldRef.current as HTMLSelectElement).value;
-    const lines = value.split(/\r\n|\n|\r/);
-    const newPlayers: Player[] = [];
-    for (const line of lines) {
-      const info = line.trim().split(' ');
-      if (info.length > 0) {
-        newPlayers.push({
-          id: crypto.randomUUID(),
-          name: info.slice(0, Math.max(info.length - 1, 1)).reduce((prev, cur) => `${prev} ${cur}`),
-          department: info[info.length - 1],
-        });
+    if (confirm('Current players will be replace with this new players. Proceed?')) {
+      const value = (textFieldRef.current as HTMLSelectElement).value;
+      const lines = value.split(/\r\n|\n|\r/);
+      const newPlayers: Player[] = [];
+      for (const line of lines) {
+        const info = line.trim().split(' ');
+        if (info.length > 0) {
+          newPlayers.push({
+            id: crypto.randomUUID(),
+            name: info.slice(0, Math.max(info.length - 1, 1)).reduce((prev, cur) => `${prev} ${cur}`),
+            department: info[info.length - 1],
+          });
+        }
       }
+      localStorage.setItem('players', JSON.stringify(newPlayers));
+      setPlayers(newPlayers);
+      (textFieldRef.current as HTMLSelectElement).value = '';
     }
-    localStorage.setItem('players', JSON.stringify(newPlayers));
-    setPlayers(newPlayers);
-    (textFieldRef.current as HTMLSelectElement).value = '';
   }
 
-  const playerList = players.filter((p) => p.name.includes(filteredName) && p.department.includes(filteredDept))
+  const playerList = players.filter((p) => 
+    p.name.toLowerCase().includes(filteredName.toLowerCase()) && 
+    p.department.toLowerCase().includes(filteredDept.toLowerCase()))
   .map((player) => <Item key={player.id}>
     <span>{player.name} / {player.department}</span>
     <button onClick={handleRemovePlayer(player.id)}>Remove</button>
