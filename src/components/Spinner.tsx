@@ -22,9 +22,9 @@ const Card = styled.div<{
    ${({ main }) => main ? `
     cursor: pointer;
     color: white;
-    background-color: #3498db;
+    background-color: #D50000;
     border-radius: 1rem;
-    height: 60px;` : 
+    height: 70px;` : 
     `
     background-color: #fff;
     `};

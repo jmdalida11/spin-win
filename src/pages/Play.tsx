@@ -5,6 +5,7 @@ import { useState } from "react";
 import { loadPlayers, loadWinners, randomNumber } from "../utils";
 import SpinAudio from '../assets/spin.mp3';
 import { Winner } from "../types/types";
+import Logo from "../assets/logo.png";
 
 const Container = styled.div`
   width: 100%;
@@ -19,7 +20,6 @@ const Container = styled.div`
 const Left = styled.div`
   width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
 `;
 
@@ -41,7 +41,7 @@ const SpinButton = styled.button`
 `;
 
 const Winners = styled.div`
-  background-color: #3498db;
+  background-color: #e10000;
   padding: 5px;
   width: 90%;
   display: inline-flex;
@@ -163,6 +163,7 @@ function Play() {
   return <Container>
     <Left>
       <div>
+        <img src={Logo} height={100} />
         <Spinner names={topPlayers} />
         <SpinButton disabled={players.length === 0 || !audio.paused} onClick={handleSpin}>Spin it!</SpinButton>
         <SpinButton disabled={players.length === 0 || !audio.paused} onClick={shuffle}>Shuffle it!</SpinButton>
