@@ -63,9 +63,21 @@ const defaultNames = [
   'Enter Player',
 ];
 
+const Prizes = [
+  'P5,000',
+  'P10,000',
+  'iWatch GPS gen 10',
+  'P30,000',
+  'Play Station 5 Slim',
+  'P50,000',
+  'iPhone 16 Pro (256GB)',
+  'Macbook Air 15 M3 (512GB)',
+  'P100,000',
+];
+
 function Play() {
   const [runConfetti, setRunConfetti] = useState(false);
-  const [prize, setPrize] = useState('');
+  const [prize, setPrize] = useState(Prizes[0]);
   const [players, setPlayers] = useState(loadPlayers());
   const [winnerIndex, setWinnerIndex] = useState(randomNumber(Math.max(players.length, 1)));
   const [winners, setWinners] = useState<Winner[]>(loadWinners());
@@ -176,7 +188,9 @@ function Play() {
     <Right>
       <div>
           <b>Prize: </b>
-          <input value={prize} onChange={(e) => setPrize(e.target.value)} />
+          <select value={prize} onChange={(e) => setPrize(e.target.value)}>
+            {Prizes.map((v) => <option value={v}>{v}</option>)}
+          </select>
       </div>
       <div>
         <h4 style={{ display: 'inline-flex', justifyContent: 'space-between', width: '92%' }}>
