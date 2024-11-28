@@ -81,6 +81,8 @@ function Play() {
   const [players, setPlayers] = useState(loadPlayers());
   const [winnerIndex, setWinnerIndex] = useState(randomNumber(Math.max(players.length, 1)));
   const [winners, setWinners] = useState<Winner[]>(loadWinners());
+  const [isInputPrize, setIsInputPrize] = useState(false);
+  const [inputPrize, setInputPrize] = useState('');
 
   const getTopPlayers = () => {
     const topNames = [...defaultNames];
@@ -146,7 +148,7 @@ function Play() {
         index = index % players.length;
       } else {
         if (players.length > 0) {
-          const newWinners = [...winners, { ...players[index], id: crypto.randomUUID(), prize: prize ? prize : 'Secret' }];
+          const newWinners = [...winners, { ...players[index], id: crypto.randomUUID(), prize: isInputPrize ? inputPrize : prize }];
           setWinners(newWinners);
           localStorage.setItem('winners', JSON.stringify(newWinners));
         }
@@ -188,9 +190,14 @@ function Play() {
     <Right>
       <div>
           <b>Prize: </b>
-          <select value={prize} onChange={(e) => setPrize(e.target.value)}>
+          <select value={prize} onChange={(e) => setPrize(e.target.value)} disabled={isInputPrize}>
             {Prizes.map((v) => <option value={v}>{v}</option>)}
           </select>
+          <span style={{ marginLeft: 20 }}>
+            <b>Input Prize</b>
+            <input type="checkbox" checked={isInputPrize} onChange={() => setIsInputPrize(prev => !prev)} />
+            {isInputPrize && <input value={inputPrize} onChange={(e) => setInputPrize(e.target.value)} />}
+          </span>
       </div>
       <div>
         <h4 style={{ display: 'inline-flex', justifyContent: 'space-between', width: '92%' }}>
