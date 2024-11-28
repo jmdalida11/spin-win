@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { loadPlayers } from "../utils";
+import { Player } from "../types/types";
 
 const Container = styled.div`
   display: flex;
@@ -15,6 +16,8 @@ const Container = styled.div`
 `;
 
 const Left = styled.div`
+  width: 50%;
+
   button {
     width: 100%;
     pointer: cursor;
@@ -83,6 +86,7 @@ const AdminPage = () => {
   const [filteredName, setFilteredName] = useState('');
   const [filteredDept, setFilteredDept] = useState('');
   const [players, setPlayers] = useState(loadPlayers());
+  const textFieldRef = useRef(null);
 
   const handleAddClick = () => {
     players.unshift({
@@ -113,6 +117,28 @@ const AdminPage = () => {
     setDepartment('');
   }
 
+  const handleAddPlayers = () => {
+    if (!textFieldRef.current) {
+      return;
+    }
+    const value = (textFieldRef.current as HTMLSelectElement).value;
+    const lines = value.split(/\r\n|\n|\r/);
+    const newPlayers: Player[] = [];
+    for (const line of lines) {
+      const info = line.trim().split(' ');
+      if (info.length > 0) {
+        newPlayers.push({
+          id: crypto.randomUUID(),
+          name: info.slice(0, Math.max(info.length - 1, 1)).reduce((prev, cur) => `${prev} ${cur}`),
+          department: info[info.length - 1],
+        });
+      }
+    }
+    localStorage.setItem('players', JSON.stringify(newPlayers));
+    setPlayers(newPlayers);
+    (textFieldRef.current as HTMLSelectElement).value = '';
+  }
+
   const playerList = players.filter((p) => p.name.includes(filteredName) && p.department.includes(filteredDept))
   .map((player) => <Item key={player.id}>
     <span>{player.name} / {player.department}</span>
@@ -121,6 +147,12 @@ const AdminPage = () => {
 
   return <Container>
     <Left>
+    <fieldset>
+        <legend>Create Players</legend>
+        <textarea style={{ width: '98%' }} rows={5} ref={textFieldRef} />
+        <button onClick={handleAddPlayers}>Create Players</button>
+      </fieldset>
+      <br />
       <fieldset>
         <legend>Add New Player</legend>
         <InputWithLabel label="Player name" value={name} setValue={setName} />
