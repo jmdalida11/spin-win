@@ -126,7 +126,7 @@ const AdminPage = () => {
       const lines = value.split(/\r\n|\n|\r/);
       const newPlayers: Player[] = [];
       for (const line of lines) {
-        const info = line.trim().split(' ');
+        const info = line.trim().replace(/\t/, ' ').split(' ');
         if (info.length > 0) {
           newPlayers.push({
             id: crypto.randomUUID(),
