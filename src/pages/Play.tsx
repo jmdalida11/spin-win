@@ -92,18 +92,18 @@ function Play() {
     }
 
     if (winnerIndex-2 < 0) {
-      topNames[0] = `${players[Math.max(players.length-2, 0)].name} / ${players[Math.max(players.length-2, 0)].department}`;
+      topNames[0] = `${players[Math.max(players.length-2, 0)].name}`;
     } else {
-      topNames[0] = `${players[winnerIndex-2].name} / ${players[winnerIndex-2].department}`
+      topNames[0] = `${players[winnerIndex-2].name}`
     }
     if (winnerIndex-1 < 0) {
-      topNames[1] = `${players[players.length-1].name} / ${players[players.length-1].department}`
+      topNames[1] = `${players[players.length-1].name}`
     } else {
-      topNames[1] = `${players[winnerIndex-1].name} / ${players[winnerIndex-1].department}`;
+      topNames[1] = `${players[winnerIndex-1].name}`;
     }
-    topNames[2] = `${players[winnerIndex].name} / ${players[winnerIndex].department}`;
-    topNames[3] = `${players[(winnerIndex+1)%players.length].name} / ${players[(winnerIndex+1)%players.length].department}`;
-    topNames[4] = `${players[(winnerIndex+2)%players.length].name} / ${players[(winnerIndex+2)%players.length].department}`;
+    topNames[2] = `${players[winnerIndex].name}`;
+    topNames[3] = `${players[(winnerIndex+1)%players.length].name}`;
+    topNames[4] = `${players[(winnerIndex+2)%players.length].name}`;
 
     return topNames;
   }
@@ -123,7 +123,7 @@ function Play() {
 
   const removePlayer = () => {
     if (players.length > 0) {
-      if (confirm(`Are you sure you want to remove "${players[winnerIndex].name} / ${players[winnerIndex].department}"?`)) {
+      if (confirm(`Are you sure you want to remove "${players[winnerIndex].name}"?`)) {
         const filteredPlayers = players.filter((p) => p.id !== players[winnerIndex].id);
         setPlayers(filteredPlayers);
         localStorage.setItem('players', JSON.stringify(filteredPlayers));
@@ -207,7 +207,7 @@ function Play() {
         <div>
           {winners.map((w, idx) => 
           <Winners>
-            <b>{idx+1}. {w.name} / {w.department} (Prize: {w.prize})</b>
+            <b>{idx+1}. {w.name} (Prize: {w.prize})</b>
             <button onClick={removeWinner(w.id)}>Remove</button>
           </Winners>)}
           
