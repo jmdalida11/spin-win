@@ -41,7 +41,7 @@ const SpinButton = styled.button`
 `;
 
 const Winners = styled.div`
-  background-color: #e10000;
+  background-color: #3498db;
   padding: 5px;
   width: 90%;
   display: inline-flex;
