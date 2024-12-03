@@ -130,8 +130,8 @@ const AdminPage = () => {
         if (info.length > 0) {
           newPlayers.push({
             id: crypto.randomUUID(),
-            name: info.join(''),
-            department: info[info.length - 1],
+            name: info.join(' '),
+            department: '',
           });
         }
       }
