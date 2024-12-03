@@ -130,8 +130,8 @@ const AdminPage = () => {
         if (info.length > 0) {
           newPlayers.push({
             id: crypto.randomUUID(),
-            name: info.slice(0, Math.max(info.length - 1, 1)).reduce((prev, cur) => `${prev} ${cur}`),
-            department: info[info.length - 1],
+            name: info.join(' '),
+            department: '',
           });
         }
       }
@@ -145,7 +145,7 @@ const AdminPage = () => {
     p.name.toLowerCase().includes(filteredName.toLowerCase()) && 
     p.department.toLowerCase().includes(filteredDept.toLowerCase()))
   .map((player) => <Item key={player.id}>
-    <span>{player.name} / {player.department}</span>
+    <span>{player.name}</span>
     <button onClick={handleRemovePlayer(player.id)}>Remove</button>
   </Item>)
 
