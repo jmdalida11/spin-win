@@ -22,7 +22,7 @@ const Card = styled.div<{
    ${({ main }) => main ? `
     cursor: pointer;
     color: white;
-    background-color: #D50000;
+    background-color: #3498db;
     border-radius: 1rem;
     height: 70px;` : 
     `
