@@ -10,6 +10,11 @@ export const loadWinners = (): Winner[] => {
   return winnersString === null ? [] : JSON.parse(winnersString);
 }
 
+export const loadPrizes = (): string[] => {
+  const prizesString = localStorage.getItem(StorageName.Prizes);
+  return prizesString === null ? [] : JSON.parse(prizesString);
+}
+
 export const randomNumber = (n: number): number => {
   return Math.floor(Math.random() * n);
 }

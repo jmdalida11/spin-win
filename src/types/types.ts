@@ -1,6 +1,7 @@
 export enum StorageName {
   Players = 'players',
-  Winners = 'winners'
+  Winners = 'winners',
+  Prizes = 'prizes'
 }
 
 export interface Player {

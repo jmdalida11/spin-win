@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 import Spinner from "../components/Spinner";
 import Confetti from 'react-confetti';
-import { useState } from "react";
-import { loadPlayers, loadWinners, randomNumber } from "../utils";
+import { useEffect, useState } from "react";
+import { loadPlayers, loadPrizes, loadWinners, randomNumber } from "../utils";
 import SpinAudio from '../assets/spin.mp3';
-import { StorageName, Winner } from "../types/types";
+import { Player, StorageName, Winner } from "../types/types";
 import Logo from "../assets/logo.png";
 
 const Container = styled.div`
@@ -63,26 +63,25 @@ const defaultNames = [
   'Enter Player',
 ];
 
-const Prizes = [
-  'P5,000',
-  'P10,000',
-  'iWatch GPS gen 10',
-  'P30,000',
-  'Play Station 5 Slim',
-  'P50,000',
-  'iPhone 16 Pro (256GB)',
-  'Macbook Air 15 M3 (512GB)',
-  'P100,000',
-];
-
 function Play() {
   const [runConfetti, setRunConfetti] = useState(false);
-  const [prize, setPrize] = useState(Prizes[0]);
-  const [players, setPlayers] = useState(loadPlayers());
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [winners, setWinners] = useState<Winner[]>([]);
+  const [prizes, setPrizes] = useState<string[]>([]);
+  const [prize, setPrize] = useState('');
   const [winnerIndex, setWinnerIndex] = useState(randomNumber(Math.max(players.length, 1)));
-  const [winners, setWinners] = useState<Winner[]>(loadWinners());
   const [isInputPrize, setIsInputPrize] = useState(false);
   const [inputPrize, setInputPrize] = useState('');
+
+  useEffect(() => {
+    setPlayers(loadPlayers());
+    setWinners(loadWinners());
+    setPrizes(loadPrizes());
+  }, []);
+  
+  useEffect(() => {
+    setPrize(prizes[0] ?? '');
+  }, [prizes]);
 
   const getTopPlayers = () => {
     const topNames = [...defaultNames];
@@ -191,7 +190,7 @@ function Play() {
       <div>
           <b>Prize: </b>
           <select value={prize} onChange={(e) => setPrize(e.target.value)} disabled={isInputPrize}>
-            {Prizes.map((v) => <option value={v}>{v}</option>)}
+            {prizes.map((v) => <option value={v}>{v}</option>)}
           </select>
           <span style={{ marginLeft: 20 }}>
             <b>Input Prize</b>

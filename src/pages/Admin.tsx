@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
-import { loadPlayers } from "../utils";
+import { loadPlayers, loadPrizes } from "../utils";
 import { Player, StorageName } from "../types/types";
 
 const Container = styled.div`
@@ -84,14 +84,23 @@ const AdminPage = () => {
   const [name, setName] = useState('');
   const [filteredName, setFilteredName] = useState('');
   const [players, setPlayers] = useState(loadPlayers());
-  const textFieldRef = useRef(null);
+  const textFieldPlayersRef = useRef(null);
+  const textFieldPrizesRef = useRef(null);
 
   useEffect(() => {
-    if (!textFieldRef.current) {
+    if (!textFieldPlayersRef.current) {
       return;
     }
-    (textFieldRef.current as HTMLSelectElement).value = players.reduce((prev, cur) => prev + '\n' + cur.name, '').trim();
+    (textFieldPlayersRef.current as HTMLSelectElement).value = players.reduce((prev, cur) => prev + '\n' + cur.name, '').trim();
   }, [players]);
+
+  useEffect(() => {
+    if (!textFieldPrizesRef.current) {
+      return;
+    }
+    const prizes = loadPrizes();
+    (textFieldPrizesRef.current as HTMLSelectElement).value = prizes.reduce((prev, cur) => prev + '\n' + cur, '').trim();
+  }, []);
 
   const handleAddClick = () => {
     players.unshift({
@@ -109,24 +118,17 @@ const AdminPage = () => {
     localStorage.setItem(StorageName.Players, JSON.stringify(filteredPlayers));
   }
 
-  const deleteAllPlayers = () => {
-    if (confirm('Are you sure you want to delete all the players?')) {
-      setPlayers([]);
-      localStorage.setItem(StorageName.Players, '[]');
-    }
-  }
-
   const handleAddPlayers = () => {
-    if (!textFieldRef.current) {
+    if (!textFieldPlayersRef.current) {
       return;
     }
     if (confirm('Current players will be replace with this new players. Proceed?')) {
-      const value = (textFieldRef.current as HTMLSelectElement).value;
+      const value = (textFieldPlayersRef.current as HTMLSelectElement).value;
       const lines = value.split(/\r\n|\n|\r/);
       const newPlayers: Player[] = [];
       for (const line of lines) {
         const playerName = line.replace(/\t/, ' ').trim();
-        if (playerName.length > 0) {
+        if (playerName !== '') {
           newPlayers.push({
             id: crypto.randomUUID(),
             name: playerName
@@ -138,6 +140,24 @@ const AdminPage = () => {
     }
   }
 
+  const handleUpdatePrizes = () => {
+    if (!textFieldPrizesRef.current) {
+      return;
+    }
+    if (confirm('Current prizes will be replace with this new prizes. Proceed?')) {
+      const value = (textFieldPrizesRef.current as HTMLSelectElement).value;
+      const lines = value.split(/\r\n|\n|\r/);
+      const newPrizes: string[] = [];
+      for (const line of lines) {
+        const prize = line.replace(/\t/, ' ').trim();
+        if (prize !== '') {
+          newPrizes.push(prize);
+        }
+      }
+      localStorage.setItem(StorageName.Prizes, JSON.stringify(newPrizes));
+    }
+  }
+
   const playerList = players.filter((p) => p.name.toLowerCase().includes(filteredName.toLowerCase()))
     .map((player) => <Item key={player.id}>
     <span>{player.name}</span>
@@ -146,10 +166,10 @@ const AdminPage = () => {
 
   return <Container>
     <Left>
-    <fieldset>
-        <legend>Create Players</legend>
-        <textarea style={{ width: '98%' }} rows={5} ref={textFieldRef} />
-        <button onClick={handleAddPlayers}>Create Players</button>
+      <fieldset>
+        <legend>Players</legend>
+        <textarea style={{ width: '98%' }} rows={5} ref={textFieldPlayersRef} />
+        <button onClick={handleAddPlayers}>Update Players</button>
       </fieldset>
       <br />
       <fieldset>
@@ -164,8 +184,9 @@ const AdminPage = () => {
       </fieldset>
       <br />
       <fieldset>
-        <legend>Remove All Players</legend>
-        <button onClick={deleteAllPlayers} disabled={players.length === 0}>Delete</button>
+        <legend>Update Prizes</legend>
+        <textarea style={{ width: '98%' }} rows={5} ref={textFieldPrizesRef} />
+        <button onClick={handleUpdatePrizes}>Update Prizes</button>
       </fieldset>
     </Left>
     <Right>
