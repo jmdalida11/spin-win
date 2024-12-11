@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { loadPlayers } from "../utils";
-import { Player } from "../types/types";
+import { Player, StorageName } from "../types/types";
 
 const Container = styled.div`
   display: flex;
@@ -82,39 +82,38 @@ const InputWithLabel: React.FC<{
 
 const AdminPage = () => {
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState('');
   const [filteredName, setFilteredName] = useState('');
-  const [filteredDept, setFilteredDept] = useState('');
   const [players, setPlayers] = useState(loadPlayers());
   const textFieldRef = useRef(null);
+
+  useEffect(() => {
+    if (!textFieldRef.current) {
+      return;
+    }
+    (textFieldRef.current as HTMLSelectElement).value = players.reduce((prev, cur) => prev + '\n' + cur.name, '').trim();
+  }, [players]);
 
   const handleAddClick = () => {
     players.unshift({
       id: crypto.randomUUID(),
       name,
-      department,
     });
     setPlayers([...players]);
-    localStorage.setItem('players', JSON.stringify(players));
-    clear();
+    localStorage.setItem(StorageName.Players, JSON.stringify(players));
+    setName('');
   }
 
   const handleRemovePlayer = (id: string) => () => {
     const filteredPlayers = players.filter((p) => p.id !== id);
     setPlayers(filteredPlayers);
-    localStorage.setItem('players', JSON.stringify(filteredPlayers));
+    localStorage.setItem(StorageName.Players, JSON.stringify(filteredPlayers));
   }
 
   const deleteAllPlayers = () => {
     if (confirm('Are you sure you want to delete all the players?')) {
       setPlayers([]);
-      localStorage.setItem('players', '[]');
+      localStorage.setItem(StorageName.Players, '[]');
     }
-  }
-
-  const clear = () => {
-    setName('');
-    setDepartment('');
   }
 
   const handleAddPlayers = () => {
@@ -126,25 +125,21 @@ const AdminPage = () => {
       const lines = value.split(/\r\n|\n|\r/);
       const newPlayers: Player[] = [];
       for (const line of lines) {
-        const info = line.trim().replace(/\t/, ' ').split(' ');
-        if (info.length > 0) {
+        const playerName = line.replace(/\t/, ' ').trim();
+        if (playerName.length > 0) {
           newPlayers.push({
             id: crypto.randomUUID(),
-            name: info.join(' '),
-            department: '',
+            name: playerName
           });
         }
       }
-      localStorage.setItem('players', JSON.stringify(newPlayers));
+      localStorage.setItem(StorageName.Players, JSON.stringify(newPlayers));
       setPlayers(newPlayers);
-      (textFieldRef.current as HTMLSelectElement).value = '';
     }
   }
 
-  const playerList = players.filter((p) => 
-    p.name.toLowerCase().includes(filteredName.toLowerCase()) && 
-    p.department.toLowerCase().includes(filteredDept.toLowerCase()))
-  .map((player) => <Item key={player.id}>
+  const playerList = players.filter((p) => p.name.toLowerCase().includes(filteredName.toLowerCase()))
+    .map((player) => <Item key={player.id}>
     <span>{player.name}</span>
     <button onClick={handleRemovePlayer(player.id)}>Remove</button>
   </Item>)
@@ -160,15 +155,12 @@ const AdminPage = () => {
       <fieldset>
         <legend>Add New Player</legend>
         <InputWithLabel label="Player name" value={name} setValue={setName} />
-        <InputWithLabel label="Department" value={department} setValue={setDepartment} />
-        <button onClick={handleAddClick} disabled={name === '' || department === ''}>Add</button>
-        <button onClick={clear} disabled={name === '' && department === ''}>Clear</button>
+        <button onClick={handleAddClick} disabled={name === ''}>Add</button>
       </fieldset>
       <br />
       <fieldset>
-        <legend>Filter Players</legend>
+        <legend>Search Players</legend>
         <InputWithLabel label="Player name" value={filteredName} setValue={setFilteredName} />
-        <InputWithLabel label="Department" value={filteredDept} setValue={setFilteredDept} />
       </fieldset>
       <br />
       <fieldset>

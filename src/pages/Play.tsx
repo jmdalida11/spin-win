@@ -4,7 +4,7 @@ import Confetti from 'react-confetti';
 import { useState } from "react";
 import { loadPlayers, loadWinners, randomNumber } from "../utils";
 import SpinAudio from '../assets/spin.mp3';
-import { Winner } from "../types/types";
+import { StorageName, Winner } from "../types/types";
 import Logo from "../assets/logo.png";
 
 const Container = styled.div`
@@ -111,13 +111,13 @@ function Play() {
   const removeWinner = (id: string) => () => {
     const filteredWinners = winners.filter((w) => w.id !== id);
     setWinners(filteredWinners);
-    localStorage.setItem('winners', JSON.stringify(filteredWinners));
+    localStorage.setItem(StorageName.Winners, JSON.stringify(filteredWinners));
   }
 
   const clearAllWinners = () => {
     if (confirm('Are you sure you want to delete all the winners?')) {
       setWinners([]);
-      localStorage.setItem('winners', '[]');
+      localStorage.setItem(StorageName.Winners, '[]');
     }
   }
 
@@ -126,7 +126,7 @@ function Play() {
       if (confirm(`Are you sure you want to remove "${players[winnerIndex].name}"?`)) {
         const filteredPlayers = players.filter((p) => p.id !== players[winnerIndex].id);
         setPlayers(filteredPlayers);
-        localStorage.setItem('players', JSON.stringify(filteredPlayers));
+        localStorage.setItem(StorageName.Players, JSON.stringify(filteredPlayers));
         setWinnerIndex(randomNumber(players.length));
       }
     }
@@ -150,7 +150,7 @@ function Play() {
         if (players.length > 0) {
           const newWinners = [...winners, { ...players[index], id: crypto.randomUUID(), prize: isInputPrize ? inputPrize : prize }];
           setWinners(newWinners);
-          localStorage.setItem('winners', JSON.stringify(newWinners));
+          localStorage.setItem(StorageName.Winners, JSON.stringify(newWinners));
         }
         setRunConfetti(true);
         clearInterval(itervalId);
