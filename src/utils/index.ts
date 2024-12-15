@@ -15,6 +15,11 @@ export const loadPrizes = (): string[] => {
   return prizesString === null ? [] : JSON.parse(prizesString);
 }
 
+export const loadWheelColor = (): string => {
+  const colorString = localStorage.getItem(StorageName.WheelColor);
+  return colorString ?? '#3498db';
+}
+
 export const randomNumber = (n: number): number => {
   return Math.floor(Math.random() * n);
 }

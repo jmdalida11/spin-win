@@ -7,14 +7,14 @@ const Container = styled.nav`
   color: white;
 `;
 
-const NavItem = styled(NavLink)<{ active?: boolean }>`
+const NavItem = styled(NavLink)<{ current: string }>`
   all: unset;
   height: 100%;
   padding: 10px;
   font-weight: bold;
   cursor: pointer;
   text-decoration: none;
-  ${(props) => props.active ? 'text-decoration: underline;' : ''}
+  ${(props) => props.current === 'active' ? 'text-decoration: underline;' : ''}
 
   &:hover {
     background-color: grey;
@@ -25,8 +25,8 @@ function Nav() {
   const location = useLocation();
 
   return <Container>
-    <NavItem to="/" active={location.pathname === '/'}>Admin</NavItem>
-    <NavItem to="/play" active={location.pathname === '/play'}>Play</NavItem>
+    <NavItem to="/" current={location.pathname === '/' ? 'active' : ''}>Admin</NavItem>
+    <NavItem to="/play" current={location.pathname === '/play' ? 'active' : ''}>Play</NavItem>
   </Container>
 }
 

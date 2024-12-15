@@ -1,7 +1,8 @@
 export enum StorageName {
   Players = 'players',
   Winners = 'winners',
-  Prizes = 'prizes'
+  Prizes = 'prizes',
+  WheelColor = 'wheel_color',
 }
 
 export interface Player {

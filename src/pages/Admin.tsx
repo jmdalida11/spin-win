@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
-import { loadPlayers, loadPrizes } from "../utils";
+import { loadPlayers, loadPrizes, loadWheelColor } from "../utils";
 import { Player, StorageName } from "../types/types";
 
 const Container = styled.div`
@@ -84,6 +84,7 @@ const AdminPage = () => {
   const [name, setName] = useState('');
   const [filteredName, setFilteredName] = useState('');
   const [players, setPlayers] = useState(loadPlayers());
+  const [color, setColor] = useState(loadWheelColor());
   const textFieldPlayersRef = useRef(null);
   const textFieldPrizesRef = useRef(null);
 
@@ -158,6 +159,15 @@ const AdminPage = () => {
     }
   }
 
+  const handleUpdateColor = () => {
+    if (CSS.supports('color', color)) {
+      localStorage.setItem(StorageName.WheelColor, color);
+      alert('Wheel Color Successfully Updated!');
+    } else {
+      alert('Invalid color: ' + color);
+    }
+  }
+
   const playerList = players.filter((p) => p.name.toLowerCase().includes(filteredName.toLowerCase()))
     .map((player) => <Item key={player.id}>
     <span>{player.name}</span>
@@ -187,6 +197,11 @@ const AdminPage = () => {
         <legend>Update Prizes</legend>
         <textarea style={{ width: '98%' }} rows={5} ref={textFieldPrizesRef} />
         <button onClick={handleUpdatePrizes}>Update Prizes</button>
+      </fieldset>
+      <fieldset>
+        <legend>Update Wheel color</legend>
+        <InputWithLabel label="Color" value={color} setValue={setColor} />
+        <button onClick={handleUpdateColor}>Update Color</button>
       </fieldset>
     </Left>
     <Right>

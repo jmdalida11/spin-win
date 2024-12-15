@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { memo } from "react";
+import { memo, useMemo } from "react";
+import { loadWheelColor } from "../utils";
 
 const SpinnerStyle = styled.div`
   width: 500px;
@@ -14,15 +15,16 @@ const Card = styled.div<{
   main?: boolean;
   isTop?: boolean; 
   isBottom?: boolean;
+  color?: string;
 }>`
   position: relative;
   height: 50px;
   width: ${({ width }) => width ?? '100%'};
    box-shadow: 0 0 1rem rgba(0,0,0,.6);
-   ${({ main }) => main ? `
+   ${({ main, color }) => main ? `
     cursor: pointer;
     color: white;
-    background-color: #3498db;
+    background-color: ${color ?? '#3498db'};
     border-radius: 1rem;
     height: 70px;` : 
     `
@@ -58,6 +60,8 @@ interface Props {
 }
 
 const Spinner: React.FC<Props> = ({ names }) => {
+  const mainColor = useMemo(() => loadWheelColor(), []);
+
   return <SpinnerStyle>
     <CardContainer>
       <Card width="60%" isTop>
@@ -70,7 +74,7 @@ const Spinner: React.FC<Props> = ({ names }) => {
       </Card>
     </CardContainer>
     <CardContainer>
-      <Card main>
+      <Card main color={mainColor}>
       <span>{names[2]}</span>
       </Card>
     </CardContainer>

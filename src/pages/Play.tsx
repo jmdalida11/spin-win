@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 import Spinner from "../components/Spinner";
 import Confetti from 'react-confetti';
-import { useEffect, useState } from "react";
-import { loadPlayers, loadPrizes, loadWinners, randomNumber } from "../utils";
+import { useEffect, useMemo, useState } from "react";
+import { loadPlayers, loadPrizes, loadWheelColor, loadWinners, randomNumber } from "../utils";
 import SpinAudio from '../assets/spin.mp3';
 import { Player, StorageName, Winner } from "../types/types";
 import Logo from "../assets/logo.png";
@@ -40,8 +40,8 @@ const SpinButton = styled.button`
   cursor: pointer;
 `;
 
-const Winners = styled.div`
-  background-color: #3498db;
+const Winners = styled.div<{color: string}>`
+  background-color: ${({ color }) => color ?? '#3498db'};
   padding: 5px;
   width: 90%;
   display: inline-flex;
@@ -73,10 +73,17 @@ function Play() {
   const [isInputPrize, setIsInputPrize] = useState(false);
   const [inputPrize, setInputPrize] = useState('');
 
+  const winnersColor = useMemo(() => loadWheelColor(), []);
+
   useEffect(() => {
     setPlayers(loadPlayers());
     setWinners(loadWinners());
     setPrizes(loadPrizes());
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
   }, []);
   
   useEffect(() => {
@@ -205,7 +212,7 @@ function Play() {
         </h4>
         <div>
           {winners.map((w, idx) => 
-          <Winners>
+          <Winners color={winnersColor}>
             <b>{idx+1}. {w.name} (Prize: {w.prize})</b>
             <button onClick={removeWinner(w.id)}>Remove</button>
           </Winners>)}
