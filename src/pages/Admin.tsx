@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
-import { useRef, useState } from "react";
-import { loadPlayers } from "../utils";
-import { Player } from "../types/types";
+import { useEffect, useRef, useState } from "react";
+import { loadPlayers, loadPrizes, loadWheelColor } from "../utils";
+import { Player, StorageName } from "../types/types";
 
 const Container = styled.div`
   display: flex;
@@ -82,98 +82,126 @@ const InputWithLabel: React.FC<{
 
 const AdminPage = () => {
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState('');
   const [filteredName, setFilteredName] = useState('');
-  const [filteredDept, setFilteredDept] = useState('');
   const [players, setPlayers] = useState(loadPlayers());
-  const textFieldRef = useRef(null);
+  const [color, setColor] = useState(loadWheelColor());
+  const textFieldPlayersRef = useRef(null);
+  const textFieldPrizesRef = useRef(null);
+
+  useEffect(() => {
+    if (!textFieldPlayersRef.current) {
+      return;
+    }
+    (textFieldPlayersRef.current as HTMLSelectElement).value = players.reduce((prev, cur) => prev + '\n' + cur.name, '').trim();
+  }, [players]);
+
+  useEffect(() => {
+    if (!textFieldPrizesRef.current) {
+      return;
+    }
+    const prizes = loadPrizes();
+    (textFieldPrizesRef.current as HTMLSelectElement).value = prizes.reduce((prev, cur) => prev + '\n' + cur, '').trim();
+  }, []);
 
   const handleAddClick = () => {
     players.unshift({
       id: crypto.randomUUID(),
       name,
-      department,
     });
     setPlayers([...players]);
-    localStorage.setItem('players', JSON.stringify(players));
-    clear();
+    localStorage.setItem(StorageName.Players, JSON.stringify(players));
+    setName('');
   }
 
   const handleRemovePlayer = (id: string) => () => {
     const filteredPlayers = players.filter((p) => p.id !== id);
     setPlayers(filteredPlayers);
-    localStorage.setItem('players', JSON.stringify(filteredPlayers));
-  }
-
-  const deleteAllPlayers = () => {
-    if (confirm('Are you sure you want to delete all the players?')) {
-      setPlayers([]);
-      localStorage.setItem('players', '[]');
-    }
-  }
-
-  const clear = () => {
-    setName('');
-    setDepartment('');
+    localStorage.setItem(StorageName.Players, JSON.stringify(filteredPlayers));
   }
 
   const handleAddPlayers = () => {
-    if (!textFieldRef.current) {
+    if (!textFieldPlayersRef.current) {
       return;
     }
     if (confirm('Current players will be replace with this new players. Proceed?')) {
-      const value = (textFieldRef.current as HTMLSelectElement).value;
+      const value = (textFieldPlayersRef.current as HTMLSelectElement).value;
       const lines = value.split(/\r\n|\n|\r/);
       const newPlayers: Player[] = [];
       for (const line of lines) {
-        const info = line.trim().replace(/\t/, ' ').split(' ');
-        if (info.length > 0) {
+        const playerName = line.replace(/\t/, ' ').trim();
+        if (playerName !== '') {
           newPlayers.push({
             id: crypto.randomUUID(),
-            name: info.slice(0, Math.max(info.length - 1, 1)).reduce((prev, cur) => `${prev} ${cur}`),
-            department: info[info.length - 1],
+            name: playerName
           });
         }
       }
-      localStorage.setItem('players', JSON.stringify(newPlayers));
+      localStorage.setItem(StorageName.Players, JSON.stringify(newPlayers));
       setPlayers(newPlayers);
-      (textFieldRef.current as HTMLSelectElement).value = '';
     }
   }
 
-  const playerList = players.filter((p) => 
-    p.name.toLowerCase().includes(filteredName.toLowerCase()) && 
-    p.department.toLowerCase().includes(filteredDept.toLowerCase()))
-  .map((player) => <Item key={player.id}>
-    <span>{player.name} / {player.department}</span>
+  const handleUpdatePrizes = () => {
+    if (!textFieldPrizesRef.current) {
+      return;
+    }
+    if (confirm('Current prizes will be replace with this new prizes. Proceed?')) {
+      const value = (textFieldPrizesRef.current as HTMLSelectElement).value;
+      const lines = value.split(/\r\n|\n|\r/);
+      const newPrizes: string[] = [];
+      for (const line of lines) {
+        const prize = line.replace(/\t/, ' ').trim();
+        if (prize !== '') {
+          newPrizes.push(prize);
+        }
+      }
+      localStorage.setItem(StorageName.Prizes, JSON.stringify(newPrizes));
+    }
+  }
+
+  const handleUpdateColor = () => {
+    if (CSS.supports('color', color)) {
+      localStorage.setItem(StorageName.WheelColor, color);
+      alert('Wheel Color Successfully Updated!');
+    } else {
+      alert('Invalid color: ' + color);
+    }
+  }
+
+  const playerList = players.filter((p) => p.name.toLowerCase().includes(filteredName.toLowerCase()))
+    .map((player) => <Item key={player.id}>
+    <span>{player.name}</span>
     <button onClick={handleRemovePlayer(player.id)}>Remove</button>
   </Item>)
 
   return <Container>
     <Left>
-    <fieldset>
-        <legend>Create Players</legend>
-        <textarea style={{ width: '98%' }} rows={5} ref={textFieldRef} />
-        <button onClick={handleAddPlayers}>Create Players</button>
+      <fieldset>
+        <legend>Players</legend>
+        <textarea style={{ width: '98%' }} rows={5} ref={textFieldPlayersRef} />
+        <button onClick={handleAddPlayers}>Update Players</button>
       </fieldset>
       <br />
       <fieldset>
         <legend>Add New Player</legend>
         <InputWithLabel label="Player name" value={name} setValue={setName} />
-        <InputWithLabel label="Department" value={department} setValue={setDepartment} />
-        <button onClick={handleAddClick} disabled={name === '' || department === ''}>Add</button>
-        <button onClick={clear} disabled={name === '' && department === ''}>Clear</button>
+        <button onClick={handleAddClick} disabled={name === ''}>Add</button>
       </fieldset>
       <br />
       <fieldset>
-        <legend>Filter Players</legend>
+        <legend>Search Players</legend>
         <InputWithLabel label="Player name" value={filteredName} setValue={setFilteredName} />
-        <InputWithLabel label="Department" value={filteredDept} setValue={setFilteredDept} />
       </fieldset>
       <br />
       <fieldset>
-        <legend>Remove All Players</legend>
-        <button onClick={deleteAllPlayers} disabled={players.length === 0}>Delete</button>
+        <legend>Update Prizes</legend>
+        <textarea style={{ width: '98%' }} rows={5} ref={textFieldPrizesRef} />
+        <button onClick={handleUpdatePrizes}>Update Prizes</button>
+      </fieldset>
+      <fieldset>
+        <legend>Update Wheel color</legend>
+        <InputWithLabel label="Color" value={color} setValue={setColor} />
+        <button onClick={handleUpdateColor}>Update Color</button>
       </fieldset>
     </Left>
     <Right>

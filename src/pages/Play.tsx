@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 import Spinner from "../components/Spinner";
 import Confetti from 'react-confetti';
-import { useState } from "react";
-import { loadPlayers, loadWinners, randomNumber } from "../utils";
+import { useEffect, useMemo, useState } from "react";
+import { loadPlayers, loadPrizes, loadWheelColor, loadWinners, randomNumber } from "../utils";
 import SpinAudio from '../assets/spin.mp3';
-import { Winner } from "../types/types";
+import { Player, StorageName, Winner } from "../types/types";
 import Logo from "../assets/logo.png";
 
 const Container = styled.div`
@@ -40,8 +40,8 @@ const SpinButton = styled.button`
   cursor: pointer;
 `;
 
-const Winners = styled.div`
-  background-color: #e10000;
+const Winners = styled.div<{color: string}>`
+  background-color: ${({ color }) => color ?? '#3498db'};
   padding: 5px;
   width: 90%;
   display: inline-flex;
@@ -63,26 +63,32 @@ const defaultNames = [
   'Enter Player',
 ];
 
-const Prizes = [
-  'P5,000',
-  'P10,000',
-  'iWatch GPS gen 10',
-  'P30,000',
-  'Play Station 5 Slim',
-  'P50,000',
-  'iPhone 16 Pro (256GB)',
-  'Macbook Air 15 M3 (512GB)',
-  'P100,000',
-];
-
 function Play() {
   const [runConfetti, setRunConfetti] = useState(false);
-  const [prize, setPrize] = useState(Prizes[0]);
-  const [players, setPlayers] = useState(loadPlayers());
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [winners, setWinners] = useState<Winner[]>([]);
+  const [prizes, setPrizes] = useState<string[]>([]);
+  const [prize, setPrize] = useState('');
   const [winnerIndex, setWinnerIndex] = useState(randomNumber(Math.max(players.length, 1)));
-  const [winners, setWinners] = useState<Winner[]>(loadWinners());
   const [isInputPrize, setIsInputPrize] = useState(false);
   const [inputPrize, setInputPrize] = useState('');
+
+  const winnersColor = useMemo(() => loadWheelColor(), []);
+
+  useEffect(() => {
+    setPlayers(loadPlayers());
+    setWinners(loadWinners());
+    setPrizes(loadPrizes());
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+  
+  useEffect(() => {
+    setPrize(prizes[0] ?? '');
+  }, [prizes]);
 
   const getTopPlayers = () => {
     const topNames = [...defaultNames];
@@ -92,18 +98,18 @@ function Play() {
     }
 
     if (winnerIndex-2 < 0) {
-      topNames[0] = `${players[Math.max(players.length-2, 0)].name} / ${players[Math.max(players.length-2, 0)].department}`;
+      topNames[0] = `${players[Math.max(players.length-2, 0)].name}`;
     } else {
-      topNames[0] = `${players[winnerIndex-2].name} / ${players[winnerIndex-2].department}`
+      topNames[0] = `${players[winnerIndex-2].name}`
     }
     if (winnerIndex-1 < 0) {
-      topNames[1] = `${players[players.length-1].name} / ${players[players.length-1].department}`
+      topNames[1] = `${players[players.length-1].name}`
     } else {
-      topNames[1] = `${players[winnerIndex-1].name} / ${players[winnerIndex-1].department}`;
+      topNames[1] = `${players[winnerIndex-1].name}`;
     }
-    topNames[2] = `${players[winnerIndex].name} / ${players[winnerIndex].department}`;
-    topNames[3] = `${players[(winnerIndex+1)%players.length].name} / ${players[(winnerIndex+1)%players.length].department}`;
-    topNames[4] = `${players[(winnerIndex+2)%players.length].name} / ${players[(winnerIndex+2)%players.length].department}`;
+    topNames[2] = `${players[winnerIndex].name}`;
+    topNames[3] = `${players[(winnerIndex+1)%players.length].name}`;
+    topNames[4] = `${players[(winnerIndex+2)%players.length].name}`;
 
     return topNames;
   }
@@ -111,22 +117,22 @@ function Play() {
   const removeWinner = (id: string) => () => {
     const filteredWinners = winners.filter((w) => w.id !== id);
     setWinners(filteredWinners);
-    localStorage.setItem('winners', JSON.stringify(filteredWinners));
+    localStorage.setItem(StorageName.Winners, JSON.stringify(filteredWinners));
   }
 
   const clearAllWinners = () => {
     if (confirm('Are you sure you want to delete all the winners?')) {
       setWinners([]);
-      localStorage.setItem('winners', '[]');
+      localStorage.setItem(StorageName.Winners, '[]');
     }
   }
 
   const removePlayer = () => {
     if (players.length > 0) {
-      if (confirm(`Are you sure you want to remove "${players[winnerIndex].name} / ${players[winnerIndex].department}"?`)) {
+      if (confirm(`Are you sure you want to remove "${players[winnerIndex].name}"?`)) {
         const filteredPlayers = players.filter((p) => p.id !== players[winnerIndex].id);
         setPlayers(filteredPlayers);
-        localStorage.setItem('players', JSON.stringify(filteredPlayers));
+        localStorage.setItem(StorageName.Players, JSON.stringify(filteredPlayers));
         setWinnerIndex(randomNumber(players.length));
       }
     }
@@ -150,7 +156,7 @@ function Play() {
         if (players.length > 0) {
           const newWinners = [...winners, { ...players[index], id: crypto.randomUUID(), prize: isInputPrize ? inputPrize : prize }];
           setWinners(newWinners);
-          localStorage.setItem('winners', JSON.stringify(newWinners));
+          localStorage.setItem(StorageName.Winners, JSON.stringify(newWinners));
         }
         setRunConfetti(true);
         clearInterval(itervalId);
@@ -191,7 +197,7 @@ function Play() {
       <div>
           <b>Prize: </b>
           <select value={prize} onChange={(e) => setPrize(e.target.value)} disabled={isInputPrize}>
-            {Prizes.map((v) => <option value={v}>{v}</option>)}
+            {prizes.map((v) => <option value={v}>{v}</option>)}
           </select>
           <span style={{ marginLeft: 20 }}>
             <b>Input Prize</b>
@@ -206,8 +212,8 @@ function Play() {
         </h4>
         <div>
           {winners.map((w, idx) => 
-          <Winners>
-            <b>{idx+1}. {w.name} / {w.department} (Prize: {w.prize})</b>
+          <Winners color={winnersColor}>
+            <b>{idx+1}. {w.name} (Prize: {w.prize})</b>
             <button onClick={removeWinner(w.id)}>Remove</button>
           </Winners>)}
           
