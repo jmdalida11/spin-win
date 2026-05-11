@@ -75,7 +75,7 @@ function Play() {
   const [prizes, setPrizes] = useState<string[]>([]);
   const [prize, setPrize] = useState("");
   const [winnerIndex, setWinnerIndex] = useState(
-    randomNumber(Math.max(players.length, 1))
+    randomNumber(Math.max(players.length, 1)),
   );
   const [isInputPrize, setIsInputPrize] = useState(false);
   const [inputPrize, setInputPrize] = useState("");
@@ -142,16 +142,16 @@ function Play() {
     if (players.length > 0) {
       if (
         confirm(
-          `Are you sure you want to remove "${players[winnerIndex].name}"?`
+          `Are you sure you want to remove "${players[winnerIndex].name}"?`,
         )
       ) {
         const filteredPlayers = players.filter(
-          (p) => p.id !== players[winnerIndex].id
+          (p) => p.id !== players[winnerIndex].id,
         );
         setPlayers(filteredPlayers);
         localStorage.setItem(
           StorageName.Players,
-          JSON.stringify(filteredPlayers)
+          JSON.stringify(filteredPlayers),
         );
         setWinnerIndex(randomNumber(players.length));
       }
@@ -167,8 +167,8 @@ function Play() {
     audio.play();
     let index = winnerIndex;
     const increment = 10;
-    const itervalId = setInterval(() => {
-      if (!audio.paused && audio.currentTime < 9) {
+    const intervalId = setInterval(() => {
+      if (!audio.paused && audio.currentTime < 4) {
         index += increment - Math.floor(audio.currentTime);
         setWinnerIndex(index % players.length);
         index = index % players.length;
@@ -186,12 +186,12 @@ function Play() {
           localStorage.setItem(StorageName.Winners, JSON.stringify(newWinners));
         }
         setRunConfetti(true);
-        clearInterval(itervalId);
+        clearInterval(intervalId);
         setTimeout(() => {
           setRunConfetti(false);
         }, 5000);
       }
-    }, randomNumber(60) + 60);
+    }, 100);
   };
 
   const shuffle = () => {
